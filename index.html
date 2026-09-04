@@ -1,0 +1,708 @@
+<title>Бриф голоса</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --bg: #EDEAE1;
+    --surface: #F8F6F0;
+    --surface-2: #E4E0D2;
+    --ink: #17181C;
+    --ink-soft: #5B5C61;
+    --ink-faint: #918F84;
+    --accent: #C81E3A;
+    --accent-strong: #A5162E;
+    --accent-ink: #FBF3EC;
+    --guide: #6E96B8;
+    --rule: #D3CFC0;
+    --shadow: rgba(23,24,28,0.10);
+    --chip-off: #EFECE3;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #111114;
+      --surface: #1B1B1F;
+      --surface-2: #232327;
+      --ink: #EDEAE1;
+      --ink-soft: #A7A5A0;
+      --ink-faint: #6E6D68;
+      --accent: #FF4A64;
+      --accent-strong: #FF6E82;
+      --accent-ink: #1A1315;
+      --guide: #6FA0CC;
+      --rule: #313136;
+      --shadow: rgba(0,0,0,0.45);
+      --chip-off: #232327;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #111114;
+    --surface: #1B1B1F;
+    --surface-2: #232327;
+    --ink: #EDEAE1;
+    --ink-soft: #A7A5A0;
+    --ink-faint: #6E6D68;
+    --accent: #FF4A64;
+    --accent-strong: #FF6E82;
+    --accent-ink: #1A1315;
+    --guide: #6FA0CC;
+    --rule: #313136;
+    --shadow: rgba(0,0,0,0.45);
+    --chip-off: #232327;
+  }
+
+  *{ box-sizing: border-box; }
+  body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Work Sans', -apple-system, 'Segoe UI', sans-serif;
+  }
+  ::selection{ background: var(--accent); color: var(--accent-ink); }
+
+  .sheet{
+    position: relative;
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 56px 28px 96px;
+  }
+  .sheet::before, .sheet::after,
+  .sheet .mark-bl, .sheet .mark-br{
+    content: "";
+    position: absolute;
+    width: 16px; height: 16px;
+    pointer-events: none;
+  }
+  .sheet::before{ top: 18px; left: 6px; border-top: 1px solid var(--guide); border-left: 1px solid var(--guide); opacity: .55; }
+  .sheet::after{ top: 18px; right: 6px; border-top: 1px solid var(--guide); border-right: 1px solid var(--guide); opacity: .55; }
+  .mark-bl{ bottom: 18px; left: 6px; border-bottom: 1px solid var(--guide); border-left: 1px solid var(--guide); opacity: .55; }
+  .mark-br{ bottom: 18px; right: 6px; border-bottom: 1px solid var(--guide); border-right: 1px solid var(--guide); opacity: .55; }
+
+  .ticket{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 22px;
+    font-family: 'IBM Plex Mono', 'SFMono-Regular', Menlo, monospace;
+    font-size: 11px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 18px;
+    margin-bottom: 34px;
+  }
+  .ticket b{ color: var(--ink-soft); font-weight: 500; }
+
+  .masthead{ margin-bottom: 8px; }
+  .eyebrow{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 14px;
+  }
+  h1{
+    font-family: 'Fraunces', Georgia, 'Times New Roman', serif;
+    font-weight: 600;
+    font-size: clamp(2.4rem, 6vw, 3.4rem);
+    line-height: 1.02;
+    letter-spacing: -0.01em;
+    margin: 0 0 18px;
+    text-wrap: balance;
+  }
+  .lede{
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    max-width: 56ch;
+    margin: 0 0 6px;
+  }
+  .lede b{ color: var(--ink); font-weight: 600; }
+
+  .progress-bar{
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--bg);
+    padding: 14px 0 12px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .progress-row{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  .progress-label{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .progress-label span{ color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .swatches{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .swatch{
+    width: 13px; height: 13px;
+    background: var(--chip-off);
+    border: 1px solid var(--rule);
+    transition: background .25s ease, border-color .25s ease;
+  }
+  .swatch.filled{ background: var(--accent); border-color: var(--accent); }
+
+  .run{ padding: 40px 0 8px; border-bottom: 1px solid var(--rule); }
+  .run:last-of-type{ border-bottom: none; }
+  .run-head{ margin-bottom: 26px; }
+  .run-tag{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--guide);
+    display: block;
+    margin-bottom: 10px;
+  }
+  .run-title{
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-size: clamp(1.5rem, 3vw, 1.9rem);
+    margin: 0 0 8px;
+  }
+  .run-intro{
+    color: var(--ink-soft);
+    font-size: 14.5px;
+    max-width: 52ch;
+    margin: 0;
+  }
+
+  .field{ margin: 30px 0; }
+  .field-q{
+    display: flex;
+    gap: 12px;
+    align-items: baseline;
+    font-size: 16px;
+    line-height: 1.5;
+    margin: 0 0 14px;
+  }
+  .field-no{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    flex: none;
+    padding-top: 2px;
+  }
+
+  textarea{
+    width: 100%;
+    resize: none;
+    overflow: hidden;
+    background: var(--surface-2);
+    color: var(--ink);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 12px 14px;
+    font-family: 'Work Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.8;
+    background-image: repeating-linear-gradient(var(--surface-2), var(--surface-2) 1.79em, var(--rule) 1.79em, var(--rule) calc(1.79em + 1px));
+    transition: border-color .2s ease;
+  }
+  textarea:focus{ outline: none; border-color: var(--guide); }
+  textarea::placeholder{ color: var(--ink-faint); }
+
+  .chips{ display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip{
+    position: relative;
+    cursor: pointer;
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    background: var(--chip-off);
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    padding: 8px 15px;
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+    user-select: none;
+  }
+  .chip input{
+    position: absolute;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .chip:has(:focus-visible){ outline: 2px solid var(--guide); outline-offset: 2px; }
+  .chip.is-checked{
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+    font-weight: 500;
+  }
+
+  .submit-zone{
+    margin-top: 44px;
+    padding-top: 32px;
+    border-top: 1px solid var(--rule);
+  }
+  .warn{
+    display: none;
+    font-size: 13.5px;
+    color: var(--accent);
+    margin: 0 0 14px;
+    max-width: 50ch;
+  }
+  .warn.show{ display: block; }
+  button.primary{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    padding: 15px 26px;
+    border-radius: 2px;
+    cursor: pointer;
+    box-shadow: 0 6px 16px var(--shadow);
+    transition: transform .15s ease, background .15s ease;
+  }
+  button.primary:hover{ background: var(--accent-strong); }
+  button.primary:active{ transform: translateY(1px); }
+  .autosave-note{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-faint);
+    margin-top: 14px;
+  }
+  .toast{
+    display: none;
+    font-size: 13px;
+    color: var(--guide);
+    margin-bottom: 22px;
+  }
+  .toast.show{ display: block; }
+
+  .done{ display: none; padding: 40px 0; }
+  .done.show{ display: block; }
+  .done h2{
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-size: clamp(1.8rem, 4vw, 2.3rem);
+    margin: 0 0 14px;
+  }
+  .done p{ color: var(--ink-soft); font-size: 15px; line-height: 1.6; max-width: 54ch; margin: 0 0 22px; }
+  .done textarea{
+    width: 100%;
+    min-height: 260px;
+    background: var(--surface-2);
+    color: var(--ink);
+    border: 1px solid var(--rule);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.7;
+    padding: 16px;
+  }
+  .done-actions{ display: flex; align-items: center; gap: 14px; margin-top: 16px; flex-wrap: wrap; }
+  button.ghost{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    letter-spacing: .04em;
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--rule);
+    padding: 11px 18px;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+  button.ghost:hover{ border-color: var(--guide); }
+  .copy-status{ font-size: 12.5px; color: var(--guide); }
+
+  @media (max-width: 560px){
+    .sheet{ padding: 40px 18px 80px; }
+    .ticket{ font-size: 10px; }
+  }
+</style>
+
+<div class="sheet">
+  <span class="mark-bl"></span><span class="mark-br"></span>
+
+  <div class="ticket">
+    <span>Форма · <b>17 позиций</b></span>
+    <span>Время · <b>15–20 мин</b></span>
+    <span>Черновик · <b>сохраняется в этом браузере</b></span>
+  </div>
+
+  <div class="masthead">
+    <p class="eyebrow">Бриф · личный голос</p>
+    <h1>Бриф голоса</h1>
+    <p class="lede">Дискавери перед тем, как строить позиционирование личного блога. <b>Часть вопросов — просто отметь</b>, часть — разверни в паре предложений. Идеальных формулировок не нужно, черновик подходит.</p>
+  </div>
+
+  <div class="progress-bar">
+    <div class="progress-row">
+      <span class="progress-label">Отвечено — <span id="progress-count">0 / 17</span></span>
+    </div>
+    <div class="swatches" id="swatches"></div>
+  </div>
+
+  <p class="toast" id="restore-toast">Черновик восстановлен — можно продолжить с того места, где остановилась.</p>
+
+  <form id="brief-form"></form>
+
+  <div class="submit-zone" id="submit-zone">
+    <p class="warn" id="warn-msg">Заполнено меньше половины — всё равно можно отправить, но чем подробнее, тем точнее выйдет позиционирование.</p>
+    <button type="button" class="primary" id="submit-btn">Отправить бриф</button>
+    <p class="autosave-note">Ничего не потеряется при закрытии вкладки — черновик уже сохранён локально.</p>
+  </div>
+
+  <div class="done" id="done-panel">
+    <h2>Бриф принят.</h2>
+    <p>Скачай PDF или скопируй текст — и пришли тому, кто собирает позиционирование (в Telegram, почтой — как удобнее).</p>
+    <textarea id="done-text" readonly></textarea>
+    <div class="done-actions">
+      <button type="button" class="ghost" id="pdf-btn">Скачать PDF</button>
+      <button type="button" class="ghost" id="copy-btn">Скопировать текст</button>
+      <span class="copy-status" id="copy-status"></span>
+    </div>
+  </div>
+</div>
+
+<div id="pdf-export" style="position:absolute; left:-9999px; top:0; width:680px; background:#ffffff; color:#17181C; padding:48px; font-family:'Work Sans',sans-serif;"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+(function(){
+  var SECTIONS = [
+    {
+      run: 1, title: 'Портрет',
+      intro: 'Кто ты, если убрать профессию из уравнения.',
+      questions: [
+        {id:'p1', type:'text', q:'Опиши себя одним предложением — без слов «дизайнер» и «арт-директор». Кто ты, если убрать профессию?', rows:2},
+        {id:'p2', type:'text', q:'Как ты пришла к своей типографии? Один поворотный момент, а не вся история с нуля.', rows:3},
+        {id:'p3', type:'text', q:'Что бесит в том, как обычно работают дизайнеры, студии и клиенты? О чём могла бы говорить с раздражением.', rows:3},
+        {id:'p4', type:'chips-multi', q:'О чём интересно говорить?', options:['Процесс и ремесло','Бизнес и цифры типографии','Провалы и ошибки','Тренды и вкус','Работа с клиентами','Команда и найм','Личное и жизнь вне работы','Обучение и менторство']}
+      ]
+    },
+    {
+      run: 2, title: 'Задача',
+      intro: 'Зачем вообще всё это затевать.',
+      questions: [
+        {id:'t1', type:'chips-multi', q:'Зачем тебе личный блог?', options:['Клиенты для типографии','Курсы или менторство','Репутация эксперта','Нетворкинг с коллегами','Найм в команду','Самовыражение без привязки к бизнесу']},
+        {id:'t2', type:'text', q:'Если один пункт из списка выше — самый важный, то какой и почему?', rows:2},
+        {id:'t3', type:'text', q:'Если через год блог выстрелит — как выглядит успех? Опиши конкретно: что происходит, кто пишет, что говорят.', rows:3}
+      ]
+    },
+    {
+      run: 3, title: 'Читатель',
+      intro: 'Для кого именно это делаем.',
+      questions: [
+        {id:'r1', type:'chips-multi', q:'С кем в первую очередь говоришь?', options:['Дизайнеры и арт-директора','Владельцы бизнеса и маркетологи','Студенты и начинающие','Широкая аудитория, просто интересуется']},
+        {id:'r2', type:'text', q:'Опиши одного реального человека (без имени) — для него хочется написать конкретный пост. Кто он, что у него болит?', rows:3}
+      ]
+    },
+    {
+      run: 4, title: 'Голос',
+      intro: 'Как звучим — не в теории, а по ощущению.',
+      questions: [
+        {id:'v1', type:'chips-multi', q:'Как хочешь звучать?', options:['Экспертно и строго','Дерзко, с юмором и мнением','Тепло и по-человечески','Провокационно, ищет споров','Спокойно и вдумчиво','Сухо и по делу']},
+        {id:'v2', type:'text', q:'Назови 2–3 блога или спикеров (любая тема, не только дизайн), чья манера говорить нравится — и почему именно она.', rows:3},
+        {id:'v3', type:'text', q:'Есть темы или форматы, которые категорически не хочешь делать? (танцы, тренд-челленджи, безликий войсовер и т.п.)', rows:2}
+      ]
+    },
+    {
+      run: 5, title: 'Мощности',
+      intro: 'Что реально потянем по времени и технике.',
+      questions: [
+        {id:'m1', type:'chips-single', q:'Сколько времени в неделю реально готова тратить на съёмку?', options:['Меньше часа','1–2 часа','3–5 часов','Больше 5 часов']},
+        {id:'m2', type:'chips-multi', q:'Что есть из техники?', options:['Телефон с приличной камерой','Свет или лампа','Микрофон','Штатив','Кто-то, кто снимет со стороны','Ничего специального']},
+        {id:'m3', type:'chips-single', q:'Комфортнее говорить на камеру...', options:['Один на один с камерой','В диалоге или интервью','Закадровым голосом, без лица','Пока не готова к видео']}
+      ]
+    },
+    {
+      run: 6, title: 'Ориентиры',
+      intro: 'На что смотрим и от чего отталкиваемся.',
+      questions: [
+        {id:'o1', type:'text', q:'Скинь 2–3 ссылки на блоги, рилсы или аккаунты, чья подача хочется взять за ориентир.', rows:3},
+        {id:'o2', type:'text', q:'А что видела и подумала «вот так — не хочу»? Антипримеры так же ценны.', rows:3}
+      ]
+    }
+  ];
+
+  var ALL_Q = [];
+  SECTIONS.forEach(function(s){ s.questions.forEach(function(q){ ALL_Q.push(q); }); });
+
+  var STORE_KEY = 'priladka-brief-draft-v1';
+  var state = {};
+  try {
+    var saved = localStorage.getItem(STORE_KEY);
+    if (saved) {
+      state = JSON.parse(saved);
+      document.getElementById('restore-toast').classList.add('show');
+    }
+  } catch (e) { state = {}; }
+
+  var form = document.getElementById('brief-form');
+  var swatchWrap = document.getElementById('swatches');
+
+  ALL_Q.forEach(function(){
+    var sw = document.createElement('div');
+    sw.className = 'swatch';
+    swatchWrap.appendChild(sw);
+  });
+
+  function pad(n){ return n < 10 ? '0' + n : '' + n; }
+
+  SECTIONS.forEach(function(section){
+    var run = document.createElement('section');
+    run.className = 'run';
+    run.innerHTML =
+      '<div class="run-head">' +
+        '<span class="run-tag">Раздел ' + pad(section.run) + '</span>' +
+        '<h2 class="run-title">' + section.title + '</h2>' +
+        '<p class="run-intro">' + section.intro + '</p>' +
+      '</div>';
+
+    section.questions.forEach(function(q, idx){
+      var field = document.createElement('div');
+      field.className = 'field';
+      var num = pad(section.run) + '.' + (idx + 1);
+
+      if (q.type === 'text') {
+        field.innerHTML =
+          '<p class="field-q"><span class="field-no">' + num + '</span><span>' + q.q + '</span></p>' +
+          '<textarea id="' + q.id + '" rows="' + q.rows + '" placeholder="Развёрнутый ответ…"></textarea>';
+      } else {
+        var name = q.type === 'chips-single' ? q.id : null;
+        var chipsHtml = q.options.map(function(opt, oi){
+          var inputType = q.type === 'chips-single' ? 'radio' : 'checkbox';
+          var inputName = name ? ' name="' + name + '"' : '';
+          var inputId = q.id + '-' + oi;
+          return '<label class="chip" data-parent="' + q.id + '">' +
+            '<input type="' + inputType + '" id="' + inputId + '"' + inputName + ' value="' + opt.replace(/"/g,'&quot;') + '">' +
+            opt + '</label>';
+        }).join('');
+        field.innerHTML =
+          '<p class="field-q"><span class="field-no">' + num + '</span><span>' + q.q + '</span></p>' +
+          '<div class="chips">' + chipsHtml + '</div>';
+      }
+      run.appendChild(field);
+    });
+
+    form.appendChild(run);
+  });
+
+  function autosize(ta){
+    ta.style.height = 'auto';
+    ta.style.height = ta.scrollHeight + 'px';
+  }
+
+  function saveDraft(){
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  function answered(q){
+    var v = state[q.id];
+    if (q.type === 'text') return !!(v && v.trim().length);
+    if (q.type === 'chips-single') return !!v;
+    return !!(v && v.length);
+  }
+
+  function updateProgress(){
+    var count = 0;
+    var swatches = swatchWrap.children;
+    ALL_Q.forEach(function(q, i){
+      var ok = answered(q);
+      if (ok) count++;
+      swatches[i].classList.toggle('filled', ok);
+    });
+    document.getElementById('progress-count').textContent = count + ' / ' + ALL_Q.length;
+    return count;
+  }
+
+  ALL_Q.forEach(function(q){
+    if (q.type === 'text') {
+      var ta = document.getElementById(q.id);
+      if (state[q.id]) ta.value = state[q.id];
+      autosize(ta);
+      ta.addEventListener('input', function(){
+        state[q.id] = ta.value;
+        autosize(ta);
+        saveDraft();
+        updateProgress();
+      });
+    } else {
+      var chips = document.querySelectorAll('[data-parent="' + q.id + '"]');
+      chips.forEach(function(chip){
+        var input = chip.querySelector('input');
+        var val = input.value;
+        if (q.type === 'chips-multi') {
+          if (state[q.id] && state[q.id].indexOf(val) !== -1) { input.checked = true; chip.classList.add('is-checked'); }
+        } else {
+          if (state[q.id] === val) { input.checked = true; chip.classList.add('is-checked'); }
+        }
+        input.addEventListener('change', function(){
+          if (q.type === 'chips-multi') {
+            var cur = state[q.id] || [];
+            if (input.checked) { cur.push(val); }
+            else { cur = cur.filter(function(v){ return v !== val; }); }
+            state[q.id] = cur;
+            chip.classList.toggle('is-checked', input.checked);
+          } else {
+            state[q.id] = val;
+            chips.forEach(function(c){ c.classList.toggle('is-checked', c.querySelector('input').checked); });
+          }
+          saveDraft();
+          updateProgress();
+        });
+      });
+    }
+  });
+
+  updateProgress();
+
+  var confirmStage = false;
+  var submitBtn = document.getElementById('submit-btn');
+  var warnMsg = document.getElementById('warn-msg');
+
+  submitBtn.addEventListener('click', function(){
+    var count = updateProgress();
+    if (!confirmStage && count < Math.ceil(ALL_Q.length / 2)) {
+      warnMsg.classList.add('show');
+      submitBtn.textContent = 'Всё равно отправить';
+      confirmStage = true;
+      return;
+    }
+    submitBrief();
+  });
+
+  function labelFor(q){ return q.q; }
+
+  function buildSummary(){
+    var lines = [];
+    lines.push('БРИФ ГОЛОСА — ответы');
+    lines.push('');
+    SECTIONS.forEach(function(section){
+      lines.push('РАЗДЕЛ ' + pad(section.run) + ' · ' + section.title.toUpperCase());
+      section.questions.forEach(function(q){
+        var v = state[q.id];
+        var answer;
+        if (q.type === 'text') answer = (v && v.trim()) ? v.trim() : '—';
+        else if (q.type === 'chips-single') answer = v || '—';
+        else answer = (v && v.length) ? v.join(', ') : '—';
+        lines.push('В: ' + labelFor(q));
+        lines.push('О: ' + answer);
+        lines.push('');
+      });
+    });
+    return lines.join('\n');
+  }
+
+  function submitBrief(){
+    var summary = buildSummary();
+    document.getElementById('submit-zone').style.display = 'none';
+    form.style.display = 'none';
+    document.getElementById('done-text').value = summary;
+    document.getElementById('done-panel').classList.add('show');
+
+    try { localStorage.removeItem(STORE_KEY); } catch (e) {}
+  }
+
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  function buildExportHtml(){
+    var html = '';
+    html += '<div style="font-family:\'IBM Plex Mono\',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:#C81E3A; margin-bottom:10px;">Бриф · личный голос</div>';
+    html += '<div style="font-family:\'Fraunces\',serif; font-weight:600; font-size:32px; margin-bottom:6px;">Бриф голоса — ответы</div>';
+    html += '<div style="font-size:12px; color:#5B5C61; margin-bottom:10px;">Дата: ' + new Date().toLocaleDateString('ru-RU') + '</div>';
+    SECTIONS.forEach(function(section){
+      html += '<div style="font-family:\'IBM Plex Mono\',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#6E96B8; margin:28px 0 16px; border-top:1px solid #D3CFC0; padding-top:22px;">Раздел ' + pad(section.run) + ' · ' + escapeHtml(section.title.toUpperCase()) + '</div>';
+      section.questions.forEach(function(q){
+        var v = state[q.id];
+        var answer;
+        if (q.type === 'text') answer = (v && v.trim()) ? v.trim() : '—';
+        else if (q.type === 'chips-single') answer = v || '—';
+        else answer = (v && v.length) ? v.join(', ') : '—';
+        html += '<div style="font-size:14px; font-weight:600; margin-bottom:6px; line-height:1.5;">' + escapeHtml(q.q) + '</div>';
+        html += '<div style="font-size:14px; color:#333333; margin-bottom:20px; white-space:pre-wrap; line-height:1.6;">' + escapeHtml(answer) + '</div>';
+      });
+    });
+    return html;
+  }
+
+  var pdfBtn = document.getElementById('pdf-btn');
+  pdfBtn.addEventListener('click', function(){
+    if (!window.jspdf || !window.html2canvas) {
+      copyStatus.textContent = 'PDF недоступен — скопируй текст.';
+      return;
+    }
+    copyStatus.textContent = 'Готовим PDF…';
+    var exportEl = document.getElementById('pdf-export');
+    exportEl.innerHTML = buildExportHtml();
+
+    var renderPromise = (document.fonts && document.fonts.ready) ? document.fonts.ready.catch(function(){}) : Promise.resolve();
+
+    renderPromise.then(function(){
+      return window.html2canvas(exportEl, { scale: 2, backgroundColor: '#ffffff' });
+    }).then(function(canvas){
+      var doc = new window.jspdf.jsPDF({ unit: 'pt', format: 'a4' });
+      var margin = 40;
+      var pageWidth = doc.internal.pageSize.getWidth();
+      var pageHeight = doc.internal.pageSize.getHeight();
+      var imgWidth = pageWidth - margin * 2;
+      var contentHeight = pageHeight - margin * 2;
+      var pxPerPt = canvas.width / imgWidth;
+      var pageHeightPx = contentHeight * pxPerPt;
+      var renderedPx = 0;
+      var first = true;
+
+      while (renderedPx < canvas.height) {
+        var sliceHeightPx = Math.min(pageHeightPx, canvas.height - renderedPx);
+        var sliceCanvas = document.createElement('canvas');
+        sliceCanvas.width = canvas.width;
+        sliceCanvas.height = sliceHeightPx;
+        sliceCanvas.getContext('2d').drawImage(
+          canvas, 0, renderedPx, canvas.width, sliceHeightPx,
+          0, 0, canvas.width, sliceHeightPx
+        );
+        if (!first) doc.addPage();
+        doc.addImage(sliceCanvas.toDataURL('image/png'), 'PNG', margin, margin, imgWidth, sliceHeightPx / pxPerPt);
+        renderedPx += sliceHeightPx;
+        first = false;
+      }
+
+      doc.save('brief-golosa-otvety.pdf');
+      copyStatus.textContent = 'PDF скачан.';
+    }).catch(function(){
+      copyStatus.textContent = 'Не получилось собрать PDF — скопируй текст.';
+    });
+  });
+
+  var copyBtn = document.getElementById('copy-btn');
+  var copyStatus = document.getElementById('copy-status');
+  copyBtn.addEventListener('click', function(){
+    var ta = document.getElementById('done-text');
+    ta.focus();
+    ta.select();
+    var done = false;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(ta.value).then(function(){
+          copyStatus.textContent = 'Скопировано.';
+        }).catch(function(){
+          copyStatus.textContent = 'Текст выделен — Cmd/Ctrl+C.';
+        });
+        done = true;
+      }
+    } catch (e) {}
+    if (!done) copyStatus.textContent = 'Текст выделен — Cmd/Ctrl+C.';
+  });
+})();
+</script>
