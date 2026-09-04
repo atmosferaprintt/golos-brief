@@ -367,6 +367,7 @@
       <button type="button" class="ghost" id="copy-btn">Скопировать текст</button>
       <span class="copy-status" id="copy-status"></span>
     </div>
+    <button type="button" class="ghost" id="restart-btn" style="margin-top:18px;">Заполнить ещё раз</button>
   </div>
 </div>
 
@@ -703,6 +704,41 @@
       }
     } catch (e) {}
     if (!done) copyStatus.textContent = 'Текст выделен — Cmd/Ctrl+C.';
+  });
+
+  var restartBtn = document.getElementById('restart-btn');
+  restartBtn.addEventListener('click', function(){
+    state = {};
+    try { localStorage.removeItem(STORE_KEY); } catch (e) {}
+
+    ALL_Q.forEach(function(q){
+      if (q.type === 'text') {
+        var ta = document.getElementById(q.id);
+        ta.value = '';
+        autosize(ta);
+      } else {
+        var chips = document.querySelectorAll('[data-parent="' + q.id + '"]');
+        chips.forEach(function(chip){
+          var input = chip.querySelector('input');
+          input.checked = false;
+          chip.classList.remove('is-checked');
+        });
+      }
+    });
+
+    updateProgress();
+
+    confirmStage = false;
+    warnMsg.classList.remove('show');
+    submitBtn.textContent = 'Отправить бриф';
+    copyStatus.textContent = '';
+
+    document.getElementById('done-panel').classList.remove('show');
+    document.getElementById('done-text').value = '';
+    form.style.display = '';
+    document.getElementById('submit-zone').style.display = '';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 })();
 </script>
